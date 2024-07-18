@@ -3,6 +3,7 @@ import http from 'http';
 import { Server } from 'socket.io';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { sign } from 'crypto';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,7 +14,7 @@ const io = new Server(server);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-const signatures = {
+let signatures = {
 };
 
 app.get('/', (req, res) => {
@@ -28,6 +29,7 @@ app.get('/bootstrap.css', (req, res) => {
 io.on('connection', (socket) => {
   socket.on('draw', (data) => {
     socket.broadcast.emit('draw', data);
+
     signatures[data.id].at(-1).push({ x: data.x, y: data.y });
   });
 
@@ -37,6 +39,11 @@ io.on('connection', (socket) => {
       signatures[id] = [];
     }
     signatures[id].push([]);
+  });
+
+  socket.on('clear', () => {
+    io.emit('clear', 1);
+    signatures = {};
   });
 
 

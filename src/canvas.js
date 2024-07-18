@@ -1,12 +1,12 @@
 import { effect } from "@vue/reactivity";
 import { role } from "./stores";
 import socket from "./socket";
-import throttle from "lodash/throttle";
 
 let id = Math.floor(Math.random() * 1000000);
 let signatures = {};
 
 export default function() {
+
   const canvas = document.getElementById('drawingCanvas');
   const ctx = canvas.getContext('2d');
 
@@ -86,7 +86,6 @@ export default function() {
       lines.forEach(line => {
         ctx.beginPath();
         ctx.moveTo(line[0][0] * width, line[0][1] * height);
-        console.log(line);
         line.forEach(({ x, y }) => {
           ctx.lineTo(x * width, y * height);
         });
@@ -109,6 +108,11 @@ export default function() {
       signatures[id] = [];
     }
     signatures[id].push([]);
+  });
+
+  socket.on('clear', (data) => {
+    signatures = {};
+    redraw();
   });
 
   socket.on('init', (data) => {

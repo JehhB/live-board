@@ -19,6 +19,21 @@
   touch-action: none;
 }
 
+.display-button {
+  z-index: 1000;
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  opacity: 0;
+  display: flex;
+  gap: 4px;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.display-button:hover {
+  opacity: 1;
+}
+
 body,
 html {
   margin: 0;
