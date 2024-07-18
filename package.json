@@ -2,8 +2,9 @@
   "name": "board",
   "version": "1.0.0",
   "main": "server.js",
+  "type": "module",
   "scripts": {
-    "dev": "nodemon server.js"
+    "dev": "concurrently \"nodemon server.js\" \"rollup -c -w\""
   },
   "keywords": [],
   "author": "",
@@ -11,9 +12,20 @@
   "description": "",
   "dependencies": {
     "express": "^4.19.2",
-    "socket.io": "^4.7.5"
+    "socket.io": "^4.7.5",
+    "socket.io-client": "^4.7.5"
   },
   "devDependencies": {
-    "nodemon": "^3.1.4"
+    "@babel/core": "^7.24.9",
+    "@babel/preset-env": "^7.24.8",
+    "@rollup/plugin-babel": "^6.0.4",
+    "@rollup/plugin-commonjs": "^26.0.1",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.1.4",
+    "rollup": "^4.18.1",
+    "rollup-plugin-livereload": "^2.0.5",
+    "rollup-plugin-polyfill-node": "^0.13.0",
+    "rollup-plugin-serve": "^1.1.1"
   }
 }

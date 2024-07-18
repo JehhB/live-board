@@ -1,29 +1,29 @@
-  body,
-  html {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-  }
+#canvasContainer {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
 
-  #canvasContainer {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
-  }
+#backgroundImage,
+#drawingCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
-  #backgroundImage,
-  #drawingCanvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+#drawingCanvas {
+  z-index: 1;
+  touch-action: none;
+}
 
-  #drawingCanvas {
-    z-index: 1;
-    touch-action: none;
-  }
+body,
+html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
