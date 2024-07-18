@@ -5,7 +5,6 @@ const backgroundImage = document.getElementById('backgroundImage');
 
 let drawing = false;
 
-// Set canvas size
 function resizeCanvas() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -14,16 +13,12 @@ function resizeCanvas() {
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
-// Make canvas transparent
 ctx.globalAlpha = 1;
 
-// Mouse Event Listeners
 canvas.addEventListener('mousedown', startDrawing);
 canvas.addEventListener('mousemove', draw);
 canvas.addEventListener('mouseup', stopDrawing);
 canvas.addEventListener('mouseout', stopDrawing);
-
-// Touch Event Listeners
 canvas.addEventListener('touchstart', handleTouchStart);
 canvas.addEventListener('touchmove', handleTouchMove);
 canvas.addEventListener('touchend', handleTouchEnd);
@@ -85,10 +80,12 @@ socket.on('draw', (data) => {
   ctx.moveTo(data.x, data.y);
 });
 
-// Fullscreen functionality
 function toggleFullScreen() {
   if (!document.fullscreenElement) {
     document.documentElement.requestFullscreen();
+    if (screen.orientation.lock) {
+      screen.orientation.lock('landscape');
+    }
   } else {
     if (document.exitFullscreen) {
       document.exitFullscreen();
@@ -96,8 +93,5 @@ function toggleFullScreen() {
   }
 }
 
-// Add double-click event to toggle fullscreen
 document.addEventListener('dblclick', toggleFullScreen);
-
-// Resize canvas when entering or exiting fullscreen
 document.addEventListener('fullscreenchange', resizeCanvas);
