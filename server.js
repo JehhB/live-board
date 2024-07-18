@@ -13,6 +13,10 @@ const io = new Server(server);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+const signatures = {
+  'test': '',
+};
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
@@ -32,6 +36,10 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log('User disconnected');
   });
+
+  socket.emit('init', () => {
+    console.log(signatures);
+  })
 });
 
 const PORT = process.env.PORT || 3000;

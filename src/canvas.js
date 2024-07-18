@@ -1,16 +1,19 @@
 import { effect } from "@vue/reactivity";
 import { role } from "./stores";
+import socket from "./socket";
 
 export default function() {
-  const socket = io();
   const canvas = document.getElementById('drawingCanvas');
   const ctx = canvas.getContext('2d');
 
   let drawing = false;
 
+  let width, height;
+
+
   function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
   }
   document.addEventListener('fullscreenchange', resizeCanvas);
 
@@ -84,17 +87,22 @@ export default function() {
     ctx.stroke();
     ctx.beginPath();
     ctx.moveTo(x, y);
-
-    socket.emit('draw', { x, y });
+    socket.emit('draw', { x: x / width, y: y / height });
   }
 
   socket.on('draw', (data) => {
+    let { x, y } = data;
+    x *= width;
+    y *= height;
+
+    console.log(x, y);
+
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
-    ctx.lineTo(data.x, data.y);
+    ctx.lineTo(x, y);
     ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(data.x, data.y);
+    ctx.moveTo(x, y);
   });
 
   document.addEventListener('fullscreenchange', resizeCanvas);
