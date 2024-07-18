@@ -1,6 +1,8 @@
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import getBabelOutputPlugin from '@rollup/plugin-babel';
+import replace from 'rollup-plugin-replace';
+import terser from '@rollup/plugin-terser';
 
 export default {
   input: 'client.js',
@@ -10,7 +12,9 @@ export default {
     name: 'bundle'
   },
   plugins: [
-    resolve(),
+    resolve({
+      browser: true,
+    }),
     commonjs(),
     getBabelOutputPlugin({
       babelHelpers: 'bundled',
@@ -20,5 +24,9 @@ export default {
         }],
       ],
     }),
+    replace({
+      'process.env.NODE_ENV': JSON.stringify('production'), // Replace process.env.NODE_ENV with 'production'
+    }),
+    terser(),
   ]
 };
