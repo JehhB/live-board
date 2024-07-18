@@ -3,11 +3,8 @@ import { role } from "./stores";
 import socket from "./socket";
 import throttle from "lodash/throttle";
 
-
-const path = {
-  id: Math.random(),
-  paths: [],
-};
+let id = Math.floor(Math.random() * 1000000);
+let signatures = {};
 
 export default function() {
   const canvas = document.getElementById('drawingCanvas');
@@ -21,9 +18,9 @@ export default function() {
   function resizeCanvas() {
     width = canvas.width = window.innerWidth;
     height = canvas.height = window.innerHeight;
+    redraw();
   }
   document.addEventListener('fullscreenchange', resizeCanvas);
-
   window.addEventListener('resize', resizeCanvas);
   resizeCanvas();
 
@@ -52,7 +49,12 @@ export default function() {
 
   function startDrawing(e) {
     e.preventDefault();
-    path.paths.push([]);
+    socket.emit('start', id)
+    if (!(id in signatures)) {
+      signatures[id] = [];
+    }
+    signatures[id].push([]);
+
     drawing = true;
     draw(e);
   }
@@ -60,8 +62,6 @@ export default function() {
   function stopDrawing(e) {
     e.preventDefault();
     drawing = false;
-    ctx.beginPath();
-    console.log(path);
   }
 
   function draw(e) {
@@ -69,19 +69,30 @@ export default function() {
     if (!drawing) return;
     const x = e.clientX || e.touches[0].clientX;
     const y = e.clientY || e.touches[0].clientY;
-    drawLine(x, y);
+
+    socket.emit('draw', { x: x / width, y: y / height, id: id });
+    signatures[id].at(-1).push({ x: x / width, y: y / height });
+
+    redraw();
   }
 
-  function drawLine(x, y) {
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-    ctx.lineTo(x, y);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    socket.emit('draw', { x: x / width, y: y / height });
-    console.log(path.paths.at(-1));
-    path.paths.at(-1).push([x / width, y / height]);
+  function redraw() {
+    ctx.clearRect(0, 0, width, height);
+
+    for (const [id, lines] of Object.entries(signatures)) {
+      ctx.strokeStyle = `block`;
+      ctx.lineWidth = 2;
+
+      lines.forEach(line => {
+        ctx.beginPath();
+        ctx.moveTo(line[0][0] * width, line[0][1] * height);
+        console.log(line);
+        line.forEach(({ x, y }) => {
+          ctx.lineTo(x * width, y * height);
+        });
+        ctx.stroke();
+      });
+    }
   }
 
   socket.on('draw', (data) => {
@@ -89,12 +100,20 @@ export default function() {
     x *= width;
     y *= height;
 
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-    ctx.lineTo(x, y);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(x, y);
+    signatures[data.id].at(-1).push({ x: data.x, y: data.y });
+    redraw();
+  });
+
+  socket.on('start', (id) => {
+    if (!(id in signatures)) {
+      signatures[id] = [];
+    }
+    signatures[id].push([]);
+  });
+
+  socket.on('init', (data) => {
+    signatures = data;
+    redraw();
   });
 
   document.addEventListener('fullscreenchange', resizeCanvas);

@@ -14,7 +14,6 @@ const io = new Server(server);
 app.use(express.static(path.join(__dirname, 'public')));
 
 const signatures = {
-  'test': '',
 };
 
 app.get('/', (req, res) => {
@@ -27,19 +26,21 @@ app.get('/bootstrap.css', (req, res) => {
 });
 
 io.on('connection', (socket) => {
-  console.log('A user connected');
-
   socket.on('draw', (data) => {
     socket.broadcast.emit('draw', data);
+    signatures[data.id].at(-1).push({ x: data.x, y: data.y });
   });
 
-  socket.on('disconnect', () => {
-    console.log('User disconnected');
+  socket.on('start', (id) => {
+    socket.broadcast.emit('start', id);
+    if (!(id in signatures)) {
+      signatures[id] = [];
+    }
+    signatures[id].push([]);
   });
 
-  socket.emit('init', () => {
-    console.log(signatures);
-  })
+
+  socket.emit('init', signatures);
 });
 
 const PORT = process.env.PORT || 3000;
