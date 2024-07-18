@@ -5,17 +5,36 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Commitment board</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="/bootstrap.css">
+  <link rel="stylesheet" href="/style.css">
 </head>
 
 <body>
+  <div id="greetModal" class="modal fade" data-bs-backdrop="static" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Join as?</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          Would you like to join as signatory or just display the commitment wall?
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="btnSignatory" class="btn btn-primary" data-bs-dismiss="modal">Signatory</button>
+          <button type="button" id="btnDisplay" class="btn btn-secondary" data-bs-dismiss="modal">Display</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="canvasContainer">
     <img id="backgroundImage" src="bg.png" alt="Background">
     <canvas id="drawingCanvas"></canvas>
   </div>
+
   <script src="/socket.io/socket.io.js"></script>
-  <script src="client.js"></script>
+  <script src="/client.js"></script>
 </body>
 
 </html>

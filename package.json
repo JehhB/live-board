@@ -13,6 +13,7 @@
   "dependencies": {
     "@rollup/plugin-terser": "^0.4.4",
     "@vue/reactivity": "^3.4.32",
+    "bootstrap": "^5.3.3",
     "express": "^4.19.2",
     "jquery": "^3.7.1",
     "socket.io": "^4.7.5",

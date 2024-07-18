@@ -27,6 +27,6 @@ export default {
     replace({
       'process.env.NODE_ENV': JSON.stringify('production'), // Replace process.env.NODE_ENV with 'production'
     }),
-    terser(),
+    //terser(),
   ]
 };
