@@ -4,7 +4,9 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"nodemon server.js\" \"rollup -c -w\""
+    "dev": "concurrently \"nodemon server.js\" \"rollup -c -w\"",
+    "build": "rollup -c",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",

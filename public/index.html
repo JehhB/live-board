@@ -15,7 +15,6 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">Join as?</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
           Would you like to join as signatory or just display the commitment wall?
@@ -23,6 +22,29 @@
         <div class="modal-footer">
           <button type="button" id="btnSignatory" class="btn btn-primary" data-bs-dismiss="modal">Signatory</button>
           <button type="button" id="btnDisplay" class="btn btn-secondary" data-bs-dismiss="modal">Display</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="commitModal" class="modal fade" data-bs-backdrop="static" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Commit signature</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to commit signature?</p>
+          <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="100" aria-valuemin="0"
+            aria-valuemax="100">
+            <div id="commit-progress" class="progress-bar"></div>
+          </div>
+          <p><small><em> This will automatically save after 5 seconds </em></small></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="btnCancel" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" id="btnCommit" class="btn btn-primary" data-bs-dismiss="modal">Commit</button>
         </div>
       </div>
     </div>

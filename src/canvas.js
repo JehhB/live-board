@@ -1,9 +1,7 @@
 import { effect } from "@vue/reactivity";
-import { role } from "./stores";
+import { commitModalShown, id, role, signatures } from "./stores";
 import socket from "./socket";
-
-let id = Math.floor(Math.random() * 1000000);
-let signatures = {};
+import debounce from "lodash/debounce";
 
 export default function() {
 
@@ -14,11 +12,10 @@ export default function() {
 
   let width, height;
 
-
   function resizeCanvas() {
     width = canvas.width = window.innerWidth;
     height = canvas.height = window.innerHeight;
-    redraw();
+    redraw(signatures);
   }
   document.addEventListener('fullscreenchange', resizeCanvas);
   window.addEventListener('resize', resizeCanvas);
@@ -49,15 +46,25 @@ export default function() {
 
   function startDrawing(e) {
     e.preventDefault();
-    socket.emit('start', id)
-    if (!(id in signatures)) {
-      signatures[id] = [];
+    socket.emit('start', id.value)
+    if (!(id.value in signatures)) {
+      Object.assign(signatures, {
+        [id.value]: {
+          commited: false,
+          paths: [],
+        }
+      })
     }
-    signatures[id].push([]);
+
+    signatures[id.value].paths.push([]);
 
     drawing = true;
     draw(e);
   }
+
+  const commit = debounce(() => {
+    commitModalShown.value = true;
+  }, 2000);
 
   function stopDrawing(e) {
     e.preventDefault();
@@ -67,23 +74,27 @@ export default function() {
   function draw(e) {
     e.preventDefault();
     if (!drawing) return;
+
+    commit();
     const x = e.clientX || e.touches[0].clientX;
     const y = e.clientY || e.touches[0].clientY;
 
-    socket.emit('draw', { x: x / width, y: y / height, id: id });
-    signatures[id].at(-1).push({ x: x / width, y: y / height });
-
-    redraw();
+    socket.emit('draw', { x: x / width, y: y / height, id: id.value });
+    signatures[id.value].paths.at(-1).push({ x: x / width, y: y / height });
   }
 
-  function redraw() {
+  function redraw(signatures) {
     ctx.clearRect(0, 0, width, height);
 
-    for (const [id, lines] of Object.entries(signatures)) {
-      ctx.strokeStyle = `block`;
+    for (const [id, signature] of Object.entries(signatures)) {
+      if (signature.commited) ctx.strokeStyle = "rgba(0, 0, 0, 1)"
+      else ctx.strokeStyle = "rgba(20, 20, 20, 0.5)"
       ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
 
-      lines.forEach(line => {
+      signature.paths.forEach(line => {
+        if (line.length == 0) return;
+
         ctx.beginPath();
         ctx.moveTo(line[0][0] * width, line[0][1] * height);
         line.forEach(({ x, y }) => {
@@ -94,30 +105,8 @@ export default function() {
     }
   }
 
-  socket.on('draw', (data) => {
-    let { x, y } = data;
-    x *= width;
-    y *= height;
-
-    signatures[data.id].at(-1).push({ x: data.x, y: data.y });
-    redraw();
-  });
-
-  socket.on('start', (id) => {
-    if (!(id in signatures)) {
-      signatures[id] = [];
-    }
-    signatures[id].push([]);
-  });
-
-  socket.on('clear', (data) => {
-    signatures = {};
-    redraw();
-  });
-
-  socket.on('init', (data) => {
-    signatures = data;
-    redraw();
+  effect(() => {
+    redraw(signatures);
   });
 
   document.addEventListener('fullscreenchange', resizeCanvas);
