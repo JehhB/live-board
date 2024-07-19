@@ -4,14 +4,16 @@ import $ from "jquery";
 import { role } from "./stores";
 
 export default function() {
-  const bgImage = new Image();
-  bgImage.src = '/bg.png';
-
   const canvas = document.getElementById('drawingCanvas');
   const tempCanvas = document.createElement('canvas');
-  tempCanvas.width = canvas.width;
-  tempCanvas.height = canvas.height;
   const tempCtx = tempCanvas.getContext('2d');
+
+  const bgImage = new Image();
+  bgImage.src = '/bg.png';
+  bgImage.onload = () => {
+    tempCanvas.width = bgImage.width;
+    tempCanvas.height = bgImage.height;
+  };
 
   const $buttons = $('.display-button');
   effect(() => {

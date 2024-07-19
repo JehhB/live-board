@@ -1,4 +1,4 @@
-import { signatures } from "./stores";
+import { id, signatures } from "./stores";
 
 const socket = io();
 
@@ -27,6 +27,7 @@ socket.on('delete', (id) => {
 });
 
 socket.on('clear', () => {
+  id.value = Math.floor(Math.random() * 1000000);
   Object.keys(signatures).forEach(key => {
     delete signatures[key];
   });

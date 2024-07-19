@@ -50,36 +50,56 @@ app.get('/bootstrap.css', (req, res) => {
 
 io.on('connection', (socket) => {
   socket.on('draw', (data) => {
-    socket.broadcast.emit('draw', data);
-    signatures[data.id].paths.at(-1).push({ x: data.x, y: data.y });
+    try {
+      socket.broadcast.emit('draw', data);
+      signatures[data.id].paths.at(-1).push({ x: data.x, y: data.y });
+    } catch (e) {
+      console.log(e);
+    }
   });
 
   socket.on('start', (id) => {
-    socket.broadcast.emit('start', id);
-    if (!(id in signatures)) {
-      Object.assign(signatures, {
-        [id]: {
-          commited: false,
-          paths: [],
-        }
-      });
+    try {
+      socket.broadcast.emit('start', id);
+      if (!(id in signatures)) {
+        Object.assign(signatures, {
+          [id]: {
+            commited: false,
+            paths: [],
+          }
+        });
+      }
+      signatures[id].paths.push([]);
+    } catch (e) {
+      console.log(e);
     }
-    signatures[id].paths.push([]);
   });
 
   socket.on('delete', (id) => {
-    socket.broadcast.emit('delete', id);
-    delete signatures[id];
+    try {
+      socket.broadcast.emit('delete', id);
+      delete signatures[id];
+    } catch (e) {
+      console.log(e);
+    }
   });
 
   socket.on('commit', (id) => {
-    socket.broadcast.emit('commit', id);
-    signatures[id].commited = true;
+    try {
+      socket.broadcast.emit('commit', id);
+      signatures[id].commited = true;
+    } catch (e) {
+      console.log(e);
+    }
   });
 
   socket.on('clear', () => {
-    io.emit('clear', 1);
-    signatures = {};
+    try {
+      io.emit('clear', 1);
+      signatures = {};
+    } catch (e) {
+      console.log(e);
+    }
   });
 
   socket.emit('init', signatures);
