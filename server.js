@@ -3,7 +3,7 @@ import http from 'http';
 import { Server } from 'socket.io';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { readFileSync, writeFileSync } from 'fs';
+import fs from 'fs/promises';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,30 +14,54 @@ const io = new Server(server);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+
 let signatures = {
 };
 
-const dump_path = path.join(__dirname, 'signatures.json');
-try {
-  signatures = JSON.parse(
-    readFileSync(dump_path, { encoding: 'utf8' })
-  );
-} catch (e) {
-  console.log(e);
+const logs = [];
+
+async function setupBackup() {
+  const dumpDirectory = path.join(__dirname, '.logs');
+
+  try {
+    await fs.access(dumpDirectory);
+  } catch (err) {
+    if (err.code === "ENOENT") {
+      await fs.mkdir(dumpDirectory);
+    } else console.error(err);
+  }
+
+
+  const dumpPath = path.join(dumpDirectory, 'signatures.json');
+  const logPath = path.join(dumpDirectory, 'logs-' + Date.now() + ".json");
+
+  try {
+    const current = await fs.readFile(dumpPath, { encoding: 'utf8' });
+    signatures = JSON.parse(current);
+
+    Object.keys(signatures).forEach(k => {
+      signatures[k] = {
+        ...signatures[k],
+        commited: true,
+      }
+    });
+
+  } catch (err) {
+    console.log("No previous session found");
+  }
+
+  async function dumpBackups() {
+    const dumpSignature = JSON.stringify(signatures);
+    fs.writeFile(dumpPath, dumpSignature);
+    fs.writeFile(logPath, JSON.stringify(logs));
+  }
+
+  setInterval(() => {
+    dumpBackups();
+  }, 10000);
 }
 
-setInterval(() => {
-  const temp = {};
-  Object.keys(signatures).forEach(k => {
-    temp[k] = {
-      ...signatures[k],
-      commited: true,
-    }
-  });
-
-  writeFileSync(dump_path, JSON.stringify(temp));
-}, 10000);
-
+setupBackup();
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -53,6 +77,7 @@ io.on('connection', (socket) => {
     try {
       socket.broadcast.emit('draw', data);
       signatures[data.id].paths.at(-1).push({ x: data.x, y: data.y });
+      logs.push(['draw', data]);
     } catch (e) {
       console.log(e);
     }
@@ -70,6 +95,7 @@ io.on('connection', (socket) => {
         });
       }
       signatures[id].paths.push([]);
+      logs.push(['start', id]);
     } catch (e) {
       console.log(e);
     }
@@ -79,6 +105,7 @@ io.on('connection', (socket) => {
     try {
       socket.broadcast.emit('delete', id);
       delete signatures[id];
+      logs.push(['delete', id]);
     } catch (e) {
       console.log(e);
     }
@@ -88,6 +115,7 @@ io.on('connection', (socket) => {
     try {
       socket.broadcast.emit('commit', id);
       signatures[id].commited = true;
+      logs.push(['commit', id]);
     } catch (e) {
       console.log(e);
     }
@@ -97,6 +125,7 @@ io.on('connection', (socket) => {
     try {
       io.emit('clear', 1);
       signatures = {};
+      logs.push(['clear']);
     } catch (e) {
       console.log(e);
     }
